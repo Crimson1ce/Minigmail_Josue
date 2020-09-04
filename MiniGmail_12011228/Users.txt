@@ -1,0 +1,2 @@
+SUDO@minigmail.edu;josu12345
+User1@minigmail.edu;pass00
