@@ -1,17 +1,39 @@
 package minigmail;
 
 import java.awt.Color;
+import java.awt.GraphicsEnvironment;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import jdk.jfr.events.FileWriteEvent;
 
 public class MiniGmail extends javax.swing.JFrame {
 
@@ -22,13 +44,29 @@ public class MiniGmail extends javax.swing.JFrame {
      */
     public MiniGmail() {
         initComponents();
+        colorFondo();
 
-        jPanel1.setBackground(new Color(r.nextInt(255) + 1, r.nextInt(255) + 1, r.nextInt(255) + 1));
+        panel.setVisible(false);
+        panel_ingreso.setBackground(new Color(r.nextInt(255) + 1, r.nextInt(255) + 1, r.nextInt(255) + 1));
         cargarCuentas();
+
+        barra_herramientas.setBounds((int) barra_herramientas.getBounds().getX(), (int) barra_herramientas.getBounds().getY(), WIDTH - (int) barra_herramientas.getBounds().getX(), (int) barra_herramientas.getBounds().getHeight());
 
         this.setLocationRelativeTo(null);
         //this.setExtendedState(MAXIMIZED_BOTH);
         //bt_signIn
+        jd_crearCuenta.pack();
+
+        doc = tp_texto.getStyledDocument();
+        estilo = tp_texto.addStyle("miEstilo", null);
+
+        DefaultComboBoxModel modelo = (DefaultComboBoxModel) cb_font.getModel();
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        String fontNames[] = ge.getAvailableFontFamilyNames();
+        for (int i = 0; i < fontNames.length; i++) {
+            modelo.addElement(fontNames[i]);
+        }
+        cb_font.setModel(modelo);
 
     }
 
@@ -42,14 +80,60 @@ public class MiniGmail extends javax.swing.JFrame {
     private void initComponents() {
 
         jd_ingreso = new javax.swing.JDialog();
-        jPanel1 = new javax.swing.JPanel();
+        panel_ingreso = new javax.swing.JPanel();
         bt_login = new javax.swing.JButton();
         cb_ingreso_cuentas = new javax.swing.JComboBox<>();
         pf_ingreso_clave = new javax.swing.JPasswordField();
-        jButton1 = new javax.swing.JButton();
-        panel = new javax.swing.JPanel();
-        bt_signIn = new javax.swing.JButton();
+        bt_showCrear = new javax.swing.JButton();
+        jd_crearCuenta = new javax.swing.JDialog();
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        tf_nombre = new javax.swing.JTextField();
+        tf_apellido = new javax.swing.JTextField();
+        tf_direccion = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        pf_clave = new javax.swing.JPasswordField();
+        pf_confirmacion = new javax.swing.JPasswordField();
+        bt_crearCuenta = new javax.swing.JButton();
+        jd_enviarCorreo = new javax.swing.JDialog();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        tp_texto = new javax.swing.JTextPane();
+        jToolBar1 = new javax.swing.JToolBar();
+        cb_font = new javax.swing.JComboBox<>();
+        cb_tamaño = new javax.swing.JComboBox<>();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
+        bt_negrita = new javax.swing.JButton();
+        bt_cursiva = new javax.swing.JButton();
+        bt_subrayado = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JToolBar.Separator();
+        bt_resaltado = new javax.swing.JButton();
+        bt_colorLetra = new javax.swing.JButton();
+        jToolBar2 = new javax.swing.JToolBar();
+        bt_guardarCorreo = new javax.swing.JButton();
+        bt_abrirCorreo = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        tf_asunto = new javax.swing.JTextField();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        list_destinatarios = new javax.swing.JList<>();
+        cb_destinatarios = new javax.swing.JComboBox<>();
+        bt_agregarDestinatario = new javax.swing.JButton();
+        bt_eliminarDestinatario = new javax.swing.JButton();
+        panel = new javax.swing.JPanel();
+        sP_bandejas = new javax.swing.JScrollPane();
+        ls_bandejas = new javax.swing.JList<>();
+        barra_herramientas = new javax.swing.JToolBar();
+        bt_mensajeNuevo = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList<>();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTextPane1 = new javax.swing.JTextPane();
+        label_personalizar = new javax.swing.JLabel();
+        bt_signIn = new javax.swing.JButton();
         menu_bar = new javax.swing.JMenuBar();
         jm_admin = new javax.swing.JMenu();
 
@@ -63,7 +147,7 @@ public class MiniGmail extends javax.swing.JFrame {
             }
         });
 
-        jPanel1.setBackground(new java.awt.Color(204, 255, 204));
+        panel_ingreso.setBackground(new java.awt.Color(204, 255, 204));
 
         bt_login.setText("Ingresar");
         bt_login.addActionListener(new java.awt.event.ActionListener() {
@@ -74,24 +158,29 @@ public class MiniGmail extends javax.swing.JFrame {
 
         cb_ingreso_cuentas.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " " }));
 
-        jButton1.setText("Crear una cuenta");
+        bt_showCrear.setText("Crear una cuenta");
+        bt_showCrear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bt_showCrearActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout panel_ingresoLayout = new javax.swing.GroupLayout(panel_ingreso);
+        panel_ingreso.setLayout(panel_ingresoLayout);
+        panel_ingresoLayout.setHorizontalGroup(
+            panel_ingresoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panel_ingresoLayout.createSequentialGroup()
                 .addGap(105, 105, 105)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.CENTER, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(panel_ingresoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bt_showCrear, javax.swing.GroupLayout.Alignment.CENTER, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(bt_login, javax.swing.GroupLayout.Alignment.CENTER, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cb_ingreso_cuentas, 0, 184, Short.MAX_VALUE)
                     .addComponent(pf_ingreso_clave))
                 .addGap(103, 103, 103))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        panel_ingresoLayout.setVerticalGroup(
+            panel_ingresoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panel_ingresoLayout.createSequentialGroup()
                 .addGap(66, 66, 66)
                 .addComponent(cb_ingreso_cuentas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -99,7 +188,7 @@ public class MiniGmail extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(bt_login)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1)
+                .addComponent(bt_showCrear)
                 .addContainerGap(94, Short.MAX_VALUE))
         );
 
@@ -107,14 +196,292 @@ public class MiniGmail extends javax.swing.JFrame {
         jd_ingreso.getContentPane().setLayout(jd_ingresoLayout);
         jd_ingresoLayout.setHorizontalGroup(
             jd_ingresoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(panel_ingreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         jd_ingresoLayout.setVerticalGroup(
             jd_ingresoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(panel_ingreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
+        jd_crearCuenta.setTitle("Creación de cuenta");
+
+        jPanel1.setBackground(new java.awt.Color(204, 255, 255));
+
+        jLabel1.setText("Nombre:");
+
+        jLabel2.setText("Apellido:");
+
+        jLabel3.setText("Dirección de correo:");
+
+        tf_direccion.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+
+        jLabel4.setText("@minigmail.edu");
+
+        jLabel5.setFont(new java.awt.Font("Leelawadee UI", 1, 24)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(0, 0, 255));
+        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel5.setText("Crear una Cuenta de Correo");
+
+        jLabel6.setText("Clave:");
+
+        jLabel7.setText("Confirmación de clave:");
+
+        bt_crearCuenta.setBackground(new java.awt.Color(0, 0, 0));
+        bt_crearCuenta.setForeground(new java.awt.Color(255, 255, 255));
+        bt_crearCuenta.setText("Crear Cuenta");
+        bt_crearCuenta.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        bt_crearCuenta.setBorderPainted(false);
+        bt_crearCuenta.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bt_crearCuentaActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(bt_crearCuenta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tf_direccion)
+                            .addComponent(pf_clave)
+                            .addComponent(pf_confirmacion)
+                            .addComponent(tf_apellido)
+                            .addComponent(tf_nombre))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel4))
+                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5)
+                .addGap(50, 50, 50)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tf_nombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(tf_apellido, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(tf_direccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(pf_clave, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(pf_confirmacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(32, 32, 32)
+                .addComponent(bt_crearCuenta)
+                .addContainerGap(23, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jd_crearCuentaLayout = new javax.swing.GroupLayout(jd_crearCuenta.getContentPane());
+        jd_crearCuenta.getContentPane().setLayout(jd_crearCuentaLayout);
+        jd_crearCuentaLayout.setHorizontalGroup(
+            jd_crearCuentaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jd_crearCuentaLayout.setVerticalGroup(
+            jd_crearCuentaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
+        tp_texto.setFont(new java.awt.Font("Agency FB", 0, 12)); // NOI18N
+        jScrollPane3.setViewportView(tp_texto);
+
+        jToolBar1.setRollover(true);
+
+        cb_font.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cb_fontItemStateChanged(evt);
+            }
+        });
+        jToolBar1.add(cb_font);
+
+        cb_tamaño.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "12", "18", "24", "36", "48", "60", "72" }));
+        cb_tamaño.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cb_tamañoActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(cb_tamaño);
+        jToolBar1.add(jSeparator2);
+
+        bt_negrita.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/negrita.png"))); // NOI18N
+        bt_negrita.setToolTipText("");
+        bt_negrita.setFocusable(false);
+        bt_negrita.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_negrita.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_negrita.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_negritaMouseClicked(evt);
+            }
+        });
+        jToolBar1.add(bt_negrita);
+
+        bt_cursiva.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/Cursiva.png"))); // NOI18N
+        bt_cursiva.setFocusable(false);
+        bt_cursiva.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_cursiva.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_cursiva.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_cursivaMouseClicked(evt);
+            }
+        });
+        jToolBar1.add(bt_cursiva);
+
+        bt_subrayado.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/Subrayado.png"))); // NOI18N
+        bt_subrayado.setFocusable(false);
+        bt_subrayado.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_subrayado.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_subrayado.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_subrayadoMouseClicked(evt);
+            }
+        });
+        jToolBar1.add(bt_subrayado);
+        jToolBar1.add(jSeparator1);
+
+        bt_resaltado.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/fondo.png"))); // NOI18N
+        bt_resaltado.setFocusable(false);
+        bt_resaltado.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_resaltado.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_resaltado.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_resaltadoMouseClicked(evt);
+            }
+        });
+        jToolBar1.add(bt_resaltado);
+
+        bt_colorLetra.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/letra.png"))); // NOI18N
+        bt_colorLetra.setFocusable(false);
+        bt_colorLetra.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_colorLetra.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_colorLetra.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_colorLetraMouseClicked(evt);
+            }
+        });
+        jToolBar1.add(bt_colorLetra);
+
+        jToolBar2.setRollover(true);
+
+        bt_guardarCorreo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/guardar.png"))); // NOI18N
+        bt_guardarCorreo.setFocusable(false);
+        bt_guardarCorreo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_guardarCorreo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_guardarCorreo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_guardarCorreoMouseClicked(evt);
+            }
+        });
+        jToolBar2.add(bt_guardarCorreo);
+
+        bt_abrirCorreo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/abrir.png"))); // NOI18N
+        bt_abrirCorreo.setFocusable(false);
+        bt_abrirCorreo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_abrirCorreo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_abrirCorreo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_abrirCorreoMouseClicked(evt);
+            }
+        });
+        jToolBar2.add(bt_abrirCorreo);
+
+        jLabel8.setText("ASUNTO:");
+
+        list_destinatarios.setModel(new DefaultListModel());
+        jScrollPane4.setViewportView(list_destinatarios);
+        list_destinatarios.getAccessibleContext().setAccessibleName("");
+
+        bt_agregarDestinatario.setText("Agregar Destinatario");
+        bt_agregarDestinatario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bt_agregarDestinatarioActionPerformed(evt);
+            }
+        });
+
+        bt_eliminarDestinatario.setText("Eliminar Destinatario");
+        bt_eliminarDestinatario.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bt_eliminarDestinatarioActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jd_enviarCorreoLayout = new javax.swing.GroupLayout(jd_enviarCorreo.getContentPane());
+        jd_enviarCorreo.getContentPane().setLayout(jd_enviarCorreoLayout);
+        jd_enviarCorreoLayout.setHorizontalGroup(
+            jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
+                .addGap(59, 59, 59)
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 590, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(94, 94, 94)
+                .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 890, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(tf_asunto)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cb_destinatarios, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
+                        .addComponent(bt_agregarDestinatario)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(bt_eliminarDestinatario))
+                    .addComponent(jScrollPane4))
+                .addContainerGap())
+        );
+        jd_enviarCorreoLayout.setVerticalGroup(
+            jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jd_enviarCorreoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(tf_asunto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cb_destinatarios, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(bt_agregarDestinatario)
+                    .addComponent(bt_eliminarDestinatario))
+                .addGap(18, 18, 18)
+                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 442, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Minigmail");
         setMinimumSize(new java.awt.Dimension(100, 10));
         setSize(new java.awt.Dimension(900, 600));
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -123,7 +490,71 @@ public class MiniGmail extends javax.swing.JFrame {
             }
         });
 
-        panel.setBackground(new java.awt.Color(255, 255, 255));
+        panel.setBackground(new java.awt.Color(51, 255, 102));
+
+        sP_bandejas.setViewportView(ls_bandejas);
+
+        barra_herramientas.setBackground(new java.awt.Color(0, 0, 0));
+        barra_herramientas.setRollover(true);
+
+        bt_mensajeNuevo.setBackground(new java.awt.Color(255, 255, 255));
+        bt_mensajeNuevo.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        bt_mensajeNuevo.setText("Mensaje Nuevo");
+        bt_mensajeNuevo.setFocusable(false);
+        bt_mensajeNuevo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_mensajeNuevo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_mensajeNuevo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bt_mensajeNuevoActionPerformed(evt);
+            }
+        });
+        barra_herramientas.add(bt_mensajeNuevo);
+
+        jScrollPane1.setViewportView(jList1);
+
+        jScrollPane2.setViewportView(jTextPane1);
+
+        label_personalizar.setBackground(new java.awt.Color(255, 255, 255));
+        label_personalizar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_personalizar.setText("Personalizar");
+        label_personalizar.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 2, true));
+        label_personalizar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                label_personalizarMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout panelLayout = new javax.swing.GroupLayout(panel);
+        panel.setLayout(panelLayout);
+        panelLayout.setHorizontalGroup(
+            panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelLayout.createSequentialGroup()
+                .addComponent(sP_bandejas, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLayout.createSequentialGroup()
+                        .addGap(382, 382, 382)
+                        .addComponent(label_personalizar)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(barra_herramientas, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        panelLayout.setVerticalGroup(
+            panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelLayout.createSequentialGroup()
+                .addComponent(barra_herramientas, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelLayout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 518, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(6, 6, 6)
+                        .addComponent(label_personalizar)
+                        .addGap(0, 11, Short.MAX_VALUE))
+                    .addComponent(sP_bandejas)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)))
+        );
 
         bt_signIn.setBackground(new java.awt.Color(0, 0, 255));
         bt_signIn.setFont(new java.awt.Font("Segoe UI Semibold", 1, 14)); // NOI18N
@@ -139,41 +570,6 @@ public class MiniGmail extends javax.swing.JFrame {
             }
         });
 
-        jLabel1.setBackground(new java.awt.Color(0, 0, 0));
-        jLabel1.setText("Personalizar");
-        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel1MouseClicked(evt);
-            }
-        });
-
-        javax.swing.GroupLayout panelLayout = new javax.swing.GroupLayout(panel);
-        panel.setLayout(panelLayout);
-        panelLayout.setHorizontalGroup(
-            panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelLayout.createSequentialGroup()
-                .addGap(384, 384, 384)
-                .addComponent(bt_signIn, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(396, 396, 396))
-            .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(panelLayout.createSequentialGroup()
-                    .addGap(421, 421, 421)
-                    .addComponent(jLabel1)
-                    .addContainerGap(421, Short.MAX_VALUE)))
-        );
-        panelLayout.setVerticalGroup(
-            panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelLayout.createSequentialGroup()
-                .addGap(215, 215, 215)
-                .addComponent(bt_signIn)
-                .addGap(362, 362, 362))
-            .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(panelLayout.createSequentialGroup()
-                    .addGap(294, 294, 294)
-                    .addComponent(jLabel1)
-                    .addContainerGap(294, Short.MAX_VALUE)))
-        );
-
         menu_bar.setBorderPainted(false);
         menu_bar.setEnabled(false);
 
@@ -186,22 +582,33 @@ public class MiniGmail extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addComponent(panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(bt_signIn, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(0, 0, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
                 .addComponent(panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(0, 280, Short.MAX_VALUE)
+                    .addComponent(bt_signIn)
+                    .addGap(0, 279, Short.MAX_VALUE)))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void formWindowDeiconified(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowDeiconified
-        if (jd_ingreso.isVisible()) {
+        if (jd_ingreso.isVisible()) 
             this.setExtendedState(ICONIFIED);
-        }
     }//GEN-LAST:event_formWindowDeiconified
 
     private void bt_signInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_signInActionPerformed
@@ -215,13 +622,13 @@ public class MiniGmail extends javax.swing.JFrame {
     private void bt_loginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_loginActionPerformed
         if (cb_ingreso_cuentas.getSelectedIndex() >= 0) {
 
-            String pass = ((Cuenta) cb_ingreso_cuentas.getSelectedItem()).getClave();
             try {
+                String pass = ((Cuenta) cb_ingreso_cuentas.getSelectedItem()).getClave();
                 if (pf_ingreso_clave.getText().equals(pass)) {
+
                     JOptionPane.showMessageDialog(jd_ingreso, "Ingreso exitoso.", "Ingresado", JOptionPane.INFORMATION_MESSAGE);
-                    
-                    panel.setVisible(false);
-                    
+                    ingresar();
+
                 } else {
                     JOptionPane.showMessageDialog(jd_ingreso, "La contraseña ingresada es incorrecta.", "No ingresado", JOptionPane.ERROR_MESSAGE);
                 }
@@ -233,55 +640,412 @@ public class MiniGmail extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_loginActionPerformed
 
     private void jd_ingresoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jd_ingresoFocusLost
-        
+
     }//GEN-LAST:event_jd_ingresoFocusLost
 
-    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
-        panel.setBackground(
-                JColorChooser.showDialog(this, "Elija un color de fondo", Color.red)
-        );
-    }//GEN-LAST:event_jLabel1MouseClicked
+    private void bt_showCrearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_showCrearActionPerformed
 
-    private void cargarCuentas() {
-        File file = new File("./Users.txt");
+        jd_crearCuenta.setLocationRelativeTo(jd_ingreso);
+        jd_crearCuenta.setVisible(true);
 
-        if (file.exists()) {
+        jd_ingreso.setModal(false);
+        jd_ingreso.setVisible(false);
 
-            FileReader fr = null;
-            BufferedReader br = null;
-            try {
+        jd_crearCuenta.setModal(true);
+    }//GEN-LAST:event_bt_showCrearActionPerformed
 
-                DefaultComboBoxModel model = (DefaultComboBoxModel) cb_ingreso_cuentas.getModel();
+    private void label_personalizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_label_personalizarMouseClicked
 
-                fr = new FileReader(file);
-                br = new BufferedReader(fr);
+        try {
+            Color c = JColorChooser.showDialog(this, "Elija un color de fondo", panel.getBackground());
 
-                String line = "";
-                while ((line = br.readLine()) != null) {
+            panel.setBackground(
+                    c
+            );
+            int r = c.getRed();
+            int g = c.getGreen();
+            int b = c.getBlue();
 
-                    String[] palabras = line.split(";");
-                    Cuenta c = new Cuenta();
-                    c.setdireccionCorreoElectronico(palabras[0]);
-                    c.setClave(palabras[1]);
+            File f = new File("./ColorFondo.txt");
 
+            if (f.exists()) {
+                try {
+
+                    FileWriter fw = new FileWriter(f, false);
+                    BufferedWriter bw = new BufferedWriter(fw);
+
+                    bw.write(r + ";" + g + ";" + b);
+
+                    bw.close();
+                    fw.close();
+
+                } catch (Exception e) {
+                }
+            }
+        } catch (Exception e) {
+        }
+    }//GEN-LAST:event_label_personalizarMouseClicked
+
+    private void bt_crearCuentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_crearCuentaActionPerformed
+
+        Dba db = new Dba("./Base2.accdb");
+        db.conectar();
+        try {
+
+            String direccion = tf_direccion.getText().trim() + "@minigmail.edu";
+            String nombre = tf_nombre.getText().trim();
+            String apellido = tf_apellido.getText().trim();
+            Date fecha = new Date();
+            SimpleDateFormat f = new SimpleDateFormat("MM/dd/yyyy");
+            String fechaDeCreacion = f.format(fecha);
+
+            String clave = "";
+
+            if (pf_clave.getText().equals(pf_confirmacion.getText())) {
+                clave = pf_clave.getText();
+
+                try {
+                    db.query.executeUpdate(
+                            "INSERT INTO Cuentas "
+                            + " (DireccionCorreo,Nombre,Apellido,Clave,FechaCreacion)"
+                            + " VALUES ('" + direccion + "','" + nombre + "','" + apellido + "','" + clave + "','" + fechaDeCreacion + "')");
+
+                    db.commit();
+
+                    jd_crearCuenta.setVisible(false);
+
+                    tf_nombre.setText("");
+                    tf_apellido.setText("");
+                    tf_direccion.setText("");
+                    pf_clave.setText("");
+                    pf_confirmacion.setText("");
+
+                    Cuenta c = new Cuenta(direccion, nombre, apellido, clave, fecha);
+                    cuentaActual = c;
+                    
+                    DefaultComboBoxModel model = (DefaultComboBoxModel) cb_ingreso_cuentas.getModel();
                     model.addElement(c);
+                    cb_ingreso_cuentas.setModel(model);
+                    
+                    ingresar();
 
+                    File dir = new File("./Correos/" + c);
+                    if (!dir.exists()) {
+                        if (!dir.mkdir()) {
+                            JOptionPane.showMessageDialog(this, "Error carpetas correos.");
+                        }
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
+            } else {
+                JOptionPane.showMessageDialog(jd_crearCuenta, "La clave no fue confirmada correctamente.", "Error de confirmación.", 0);
+                pf_clave.setText("");
+                pf_confirmacion.setText("");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        db.desconectar();
+
+    }//GEN-LAST:event_bt_crearCuentaActionPerformed
+
+    private void cb_fontItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cb_fontItemStateChanged
+        // TODO add your handling code here:
+        StyleConstants.setFontFamily(estilo, cb_font.getSelectedItem().toString());
+        //StyleConstants.setFontSize(estilo, Integer.parseInt(cb_tamaño.getSelectedItem().toString()));
+        doc.setCharacterAttributes(tp_texto.getSelectionStart(),
+                tp_texto.getSelectionEnd() - tp_texto.getSelectionStart(),
+                tp_texto.getStyle("miEstilo"),
+                true);
+    }//GEN-LAST:event_cb_fontItemStateChanged
+
+    private void cb_tamañoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cb_tamañoActionPerformed
+        // TODO add your handling code here:
+        StyleConstants.setFontSize(estilo, Integer.parseInt(cb_tamaño.getSelectedItem().toString()));
+        doc.setCharacterAttributes(tp_texto.getSelectionStart(),
+                tp_texto.getSelectionEnd() - tp_texto.getSelectionStart(),
+                tp_texto.getStyle("miEstilo"),
+                true);
+    }//GEN-LAST:event_cb_tamañoActionPerformed
+
+    private void bt_negritaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_negritaMouseClicked
+        // TODO add your handling code here:
+        try {
+            StyleConstants.setBold(estilo, true);
+
+            doc.setCharacterAttributes(tp_texto.getSelectionStart(),
+                    tp_texto.getSelectionEnd() - tp_texto.getSelectionStart(),
+                    tp_texto.getStyle("miEstilo"),
+                    true);
+        } catch (Exception ex) {
+        }
+    }//GEN-LAST:event_bt_negritaMouseClicked
+
+    private void bt_cursivaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cursivaMouseClicked
+        // TODO add your handling code here:
+        try {
+            StyleConstants.setItalic(estilo, true);
+
+            doc.setCharacterAttributes(tp_texto.getSelectionStart(),
+                    tp_texto.getSelectionEnd() - tp_texto.getSelectionStart(),
+                    tp_texto.getStyle("miEstilo"),
+                    true);
+        } catch (Exception ex) {
+        }
+    }//GEN-LAST:event_bt_cursivaMouseClicked
+
+    private void bt_subrayadoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_subrayadoMouseClicked
+        // TODO add your handling code here:
+        try {
+            StyleConstants.setUnderline(estilo, true);
+
+            doc.setCharacterAttributes(tp_texto.getSelectionStart(),
+                    tp_texto.getSelectionEnd() - tp_texto.getSelectionStart(),
+                    tp_texto.getStyle("miEstilo"),
+                    true);
+        } catch (Exception ex) {
+        }
+    }//GEN-LAST:event_bt_subrayadoMouseClicked
+
+    private void bt_resaltadoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_resaltadoMouseClicked
+        // TODO add your handling code here:
+        try {
+
+            StyleConstants.setBackground(estilo,
+                    JColorChooser.showDialog(this,
+                            "Seleccione Color", Color.yellow)
+            );
+
+            doc.setCharacterAttributes(tp_texto.getSelectionStart(),
+                    tp_texto.getSelectionEnd() - tp_texto.getSelectionStart(),
+                    tp_texto.getStyle("miEstilo"),
+                    true);
+        } catch (Exception ex) {
+        }
+    }//GEN-LAST:event_bt_resaltadoMouseClicked
+
+    private void bt_colorLetraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_colorLetraMouseClicked
+        // TODO add your handling code here:
+        try {
+
+            StyleConstants.setForeground(estilo,
+                    JColorChooser.showDialog(this,
+                            "Seleccione Color", Color.red)
+            );
+
+            doc.setCharacterAttributes(tp_texto.getSelectionStart(),
+                    tp_texto.getSelectionEnd() - tp_texto.getSelectionStart(),
+                    tp_texto.getStyle("miEstilo"),
+                    true);
+        } catch (Exception ex) {
+        }
+    }//GEN-LAST:event_bt_colorLetraMouseClicked
+
+    private void bt_guardarCorreoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarCorreoMouseClicked
+        JFileChooser jfc = new JFileChooser();
+        FileNameExtensionFilter filtro
+                = new FileNameExtensionFilter(
+                        "El Inge Docs", "omf");
+        jfc.setFileFilter(filtro);
+        int seleccion = jfc.showSaveDialog(this);
+
+        FileOutputStream fw = null;
+        ObjectOutputStream bw = null;
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            try {
+
+                File fichero = null;
+                if (jfc.getFileFilter().getDescription().equals(
+                        "El Inge Docs")) {
+                    fichero
+                            = new File(jfc.getSelectedFile().getPath() + ".omf");
+                } else {
+                    fichero = jfc.getSelectedFile();
+                }
+
+                fw = new FileOutputStream(fichero);
+                bw = new ObjectOutputStream(fw);
+                Documento d = new Documento(tp_texto, doc, estilo);
+                bw.writeObject(d);
+                bw.flush();
+
+                JOptionPane.showMessageDialog(this,
+                        "Archivo guardado exitosamente");
+
+            } catch (Exception e) {
+            }
+
+        }//fin IF
+        try {
+            bw.close();
+            fw.close();
+        } catch (IOException ex) {
+        }
+
+    }//GEN-LAST:event_bt_guardarCorreoMouseClicked
+
+    private void bt_abrirCorreoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_abrirCorreoMouseClicked
+        // TODO add your handling code here:
+        File fichero = null;
+        FileInputStream entrada = null;
+        ObjectInputStream objeto = null;
+        try {
+            JFileChooser jfc = new JFileChooser();
+            FileNameExtensionFilter filtro
+                    = new FileNameExtensionFilter(
+                            "El Inge Docs", "omf");
+            jfc.setFileFilter(filtro);
+            int seleccion = jfc.showOpenDialog(this);
+            if (seleccion == JFileChooser.APPROVE_OPTION) {
+                fichero = jfc.getSelectedFile();
+                entrada
+                        = new FileInputStream(fichero);
+                objeto
+                        = new ObjectInputStream(entrada);
+                tp_texto.setText("");
+                Documento temp = (Documento) objeto.readObject();
+                tp_texto.setText(((Documento) temp).getPanel().getText());
+                tp_texto.setDocument(((Documento) temp).getDoc());
+
+            } //fin if
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            objeto.close();
+            entrada.close();
+        } catch (IOException ex) {
+        }
+    }//GEN-LAST:event_bt_abrirCorreoMouseClicked
+
+    private void bt_mensajeNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_mensajeNuevoActionPerformed
+        
+        jd_enviarCorreo.pack();
+        jd_enviarCorreo.setLocationRelativeTo(this);
+        jd_enviarCorreo.setModal(true);
+        jd_enviarCorreo.setVisible(true);
+        
+        
+    }//GEN-LAST:event_bt_mensajeNuevoActionPerformed
+
+    private void bt_agregarDestinatarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_agregarDestinatarioActionPerformed
+        if (cb_destinatarios.getSelectedIndex()>=0) {
+            
+            DefaultListModel model = (DefaultListModel)list_destinatarios.getModel();
+            if (!model.contains((Cuenta)cb_destinatarios.getSelectedItem())) {
+                model.addElement((Cuenta)cb_destinatarios.getSelectedItem());
+            }
+            list_destinatarios.setModel(model);
+            
+        } else {
+            JOptionPane.showMessageDialog(jd_enviarCorreo, "Sleccione una cuenta.", "Sin selección.", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_bt_agregarDestinatarioActionPerformed
+
+    private void bt_eliminarDestinatarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_eliminarDestinatarioActionPerformed
+        if (list_destinatarios.getSelectedIndex()>=0) {
+            
+            DefaultListModel model = (DefaultListModel)list_destinatarios.getModel();
+            int[] arr = list_destinatarios.getSelectedIndices();
+            
+            for (int i=arr.length-1; i>=0; i--) {
+                try {
+                    model.removeElementAt(i);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            list_destinatarios.setModel(model);
+        }
+    }//GEN-LAST:event_bt_eliminarDestinatarioActionPerformed
+
+    private void cargarCuentas() {
+
+        Dba db = new Dba("./Base2.accdb");
+        db.conectar();
+        try {
+            db.query.execute("SELECT DireccionCorreo,Nombre,Apellido,Clave,FechaCreacion FROM Cuentas");
+            ResultSet rs = db.query.getResultSet();
+
+            DefaultComboBoxModel model = (DefaultComboBoxModel) cb_ingreso_cuentas.getModel();
+
+            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+
+            while (rs.next()) {
+
+                //System.out.println(rs.getInt(1) + "--->" + rs.getString(2));
+                Cuenta c = new Cuenta();
+                c.setdireccionCorreoElectronico(rs.getString("DireccionCorreo"));
+                c.setNombre(rs.getString("Nombre"));
+                c.setApellido(rs.getString("Apellido"));
+                c.setClave(rs.getString("Clave"));
+
+                try {
+                    c.setFechaDeCreacion(df.parse(rs.getString("FechaCreacion")));
+                } catch (ParseException ex) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Error con el parseo de fechas.",
+                            "Error de cargado.",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                }
+
+                model.addElement(c);
+
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        db.desconectar();
+    }
+
+    private void colorFondo() {
+        File f = new File("./ColorFondo.txt");
+        if (f.exists()) {
+            Scanner sc = null;
+            try {
+                sc = new Scanner(f);
+                sc.useDelimiter(";");
+                /*fr = new FileReader(f);
+                br = new BufferedReader(fr);
+                 */
+
+                int r = 0, g = 0, b = 0;
+                while (sc.hasNext()) {
+                    r = sc.nextInt();
+                    g = sc.nextInt();
+                    b = sc.nextInt();
+                }
+
+                panel.setBackground(
+                        new Color(r, g, b)
+                );
+
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(MiniGmail.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(MiniGmail.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(this, "El record de color no fue encontrado.", "Error", JOptionPane.ERROR_MESSAGE);
             } finally {
                 try {
-                    br.close();
-                    fr.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(MiniGmail.class.getName()).log(Level.SEVERE, null, ex);
+                    sc.close();
+                } catch (NullPointerException ex) {
                 }
             }
         }
+    }
 
+    private void ingresar() {
+        jd_ingreso.setVisible(false);
+        bt_signIn.setVisible(false);
+        panel.setVisible(true);
+        menu_bar.setEnabled(true);
+        
+        DefaultComboBoxModel cbm = (DefaultComboBoxModel)cb_ingreso_cuentas.getModel();
+        cb_destinatarios.setModel(cbm);
     }
 
     /**
@@ -320,16 +1084,68 @@ public class MiniGmail extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JToolBar barra_herramientas;
+    private javax.swing.JButton bt_abrirCorreo;
+    private javax.swing.JButton bt_agregarDestinatario;
+    private javax.swing.JButton bt_colorLetra;
+    private javax.swing.JButton bt_crearCuenta;
+    private javax.swing.JButton bt_cursiva;
+    private javax.swing.JButton bt_eliminarDestinatario;
+    private javax.swing.JButton bt_guardarCorreo;
     private javax.swing.JButton bt_login;
+    private javax.swing.JButton bt_mensajeNuevo;
+    private javax.swing.JButton bt_negrita;
+    private javax.swing.JButton bt_resaltado;
+    private javax.swing.JButton bt_showCrear;
     private javax.swing.JButton bt_signIn;
+    private javax.swing.JButton bt_subrayado;
+    private javax.swing.JComboBox<String> cb_destinatarios;
+    private javax.swing.JComboBox<String> cb_font;
     private javax.swing.JComboBox<String> cb_ingreso_cuentas;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JComboBox<String> cb_tamaño;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JToolBar.Separator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator2;
+    private javax.swing.JTextPane jTextPane1;
+    private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JToolBar jToolBar2;
+    private javax.swing.JDialog jd_crearCuenta;
+    private javax.swing.JDialog jd_enviarCorreo;
     private javax.swing.JDialog jd_ingreso;
     private javax.swing.JMenu jm_admin;
+    private javax.swing.JLabel label_personalizar;
+    private javax.swing.JList<String> list_destinatarios;
+    private javax.swing.JList<String> ls_bandejas;
     private javax.swing.JMenuBar menu_bar;
     private javax.swing.JPanel panel;
+    private javax.swing.JPanel panel_ingreso;
+    private javax.swing.JPasswordField pf_clave;
+    private javax.swing.JPasswordField pf_confirmacion;
     private javax.swing.JPasswordField pf_ingreso_clave;
+    private javax.swing.JScrollPane sP_bandejas;
+    private javax.swing.JTextField tf_apellido;
+    private javax.swing.JTextField tf_asunto;
+    private javax.swing.JTextField tf_direccion;
+    private javax.swing.JTextField tf_nombre;
+    private javax.swing.JTextPane tp_texto;
     // End of variables declaration//GEN-END:variables
+
+    Style estilo;
+    StyledDocument doc;
+
+    Cuenta cuentaActual;
+
 }
