@@ -33,6 +33,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.tree.DefaultMutableTreeNode;
 import jdk.jfr.events.FileWriteEvent;
 
 public class MiniGmail extends javax.swing.JFrame {
@@ -114,8 +115,8 @@ public class MiniGmail extends javax.swing.JFrame {
         bt_resaltado = new javax.swing.JButton();
         bt_colorLetra = new javax.swing.JButton();
         jToolBar2 = new javax.swing.JToolBar();
-        bt_guardarCorreo = new javax.swing.JButton();
-        bt_abrirCorreo = new javax.swing.JButton();
+        bt_abrirBorrador = new javax.swing.JButton();
+        bt_guardarBorrador = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         tf_asunto = new javax.swing.JTextField();
         jScrollPane4 = new javax.swing.JScrollPane();
@@ -123,6 +124,7 @@ public class MiniGmail extends javax.swing.JFrame {
         cb_destinatarios = new javax.swing.JComboBox<>();
         bt_agregarDestinatario = new javax.swing.JButton();
         bt_eliminarDestinatario = new javax.swing.JButton();
+        bt_enviarCorreo = new javax.swing.JButton();
         panel = new javax.swing.JPanel();
         sP_bandejas = new javax.swing.JScrollPane();
         ls_bandejas = new javax.swing.JList<>();
@@ -306,7 +308,7 @@ public class MiniGmail extends javax.swing.JFrame {
             .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
-        tp_texto.setFont(new java.awt.Font("Agency FB", 0, 12)); // NOI18N
+        tp_texto.setFont(new java.awt.Font("Agency FB", 0, 18)); // NOI18N
         jScrollPane3.setViewportView(tp_texto);
 
         jToolBar1.setRollover(true);
@@ -319,6 +321,7 @@ public class MiniGmail extends javax.swing.JFrame {
         jToolBar1.add(cb_font);
 
         cb_tamaño.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "12", "18", "24", "36", "48", "60", "72" }));
+        cb_tamaño.setSelectedIndex(1);
         cb_tamaño.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cb_tamañoActionPerformed(evt);
@@ -386,27 +389,29 @@ public class MiniGmail extends javax.swing.JFrame {
 
         jToolBar2.setRollover(true);
 
-        bt_guardarCorreo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/guardar.png"))); // NOI18N
-        bt_guardarCorreo.setFocusable(false);
-        bt_guardarCorreo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        bt_guardarCorreo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        bt_guardarCorreo.addMouseListener(new java.awt.event.MouseAdapter() {
+        bt_abrirBorrador.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/abrir.png"))); // NOI18N
+        bt_abrirBorrador.setText("Abrir Borrador");
+        bt_abrirBorrador.setFocusable(false);
+        bt_abrirBorrador.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_abrirBorrador.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_abrirBorrador.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                bt_guardarCorreoMouseClicked(evt);
+                bt_abrirBorradorMouseClicked(evt);
             }
         });
-        jToolBar2.add(bt_guardarCorreo);
+        jToolBar2.add(bt_abrirBorrador);
 
-        bt_abrirCorreo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/abrir.png"))); // NOI18N
-        bt_abrirCorreo.setFocusable(false);
-        bt_abrirCorreo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        bt_abrirCorreo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        bt_abrirCorreo.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                bt_abrirCorreoMouseClicked(evt);
+        bt_guardarBorrador.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos/guardar.png"))); // NOI18N
+        bt_guardarBorrador.setText("Guardar como Borrador");
+        bt_guardarBorrador.setFocusable(false);
+        bt_guardarBorrador.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_guardarBorrador.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_guardarBorrador.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bt_guardarBorradorActionPerformed(evt);
             }
         });
-        jToolBar2.add(bt_abrirCorreo);
+        jToolBar2.add(bt_guardarBorrador);
 
         jLabel8.setText("ASUNTO:");
 
@@ -428,6 +433,20 @@ public class MiniGmail extends javax.swing.JFrame {
             }
         });
 
+        bt_enviarCorreo.setBackground(new java.awt.Color(255, 0, 0));
+        bt_enviarCorreo.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        bt_enviarCorreo.setText("Enviar Correo");
+        bt_enviarCorreo.setBorder(new javax.swing.border.MatteBorder(null));
+        bt_enviarCorreo.setBorderPainted(false);
+        bt_enviarCorreo.setFocusable(false);
+        bt_enviarCorreo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        bt_enviarCorreo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        bt_enviarCorreo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bt_enviarCorreoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jd_enviarCorreoLayout = new javax.swing.GroupLayout(jd_enviarCorreo.getContentPane());
         jd_enviarCorreo.getContentPane().setLayout(jd_enviarCorreoLayout);
         jd_enviarCorreoLayout.setHorizontalGroup(
@@ -435,14 +454,12 @@ public class MiniGmail extends javax.swing.JFrame {
             .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
                 .addGap(59, 59, 59)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 590, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(94, 94, 94)
-                .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(0, 6, Short.MAX_VALUE)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 890, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
                         .addComponent(jLabel8)
@@ -450,22 +467,28 @@ public class MiniGmail extends javax.swing.JFrame {
                         .addComponent(tf_asunto)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cb_destinatarios, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
-                        .addComponent(bt_agregarDestinatario)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(bt_eliminarDestinatario))
-                    .addComponent(jScrollPane4))
-                .addContainerGap())
+                        .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane4)
+                            .addComponent(bt_enviarCorreo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
+                                .addComponent(bt_agregarDestinatario)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(bt_eliminarDestinatario)
+                                .addGap(0, 6, Short.MAX_VALUE)))
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jd_enviarCorreoLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(39, 39, 39))))
         );
         jd_enviarCorreoLayout.setVerticalGroup(
             jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jd_enviarCorreoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
                 .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
@@ -476,7 +499,12 @@ public class MiniGmail extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jd_enviarCorreoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 442, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jd_enviarCorreoLayout.createSequentialGroup()
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(bt_enviarCorreo, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jToolBar2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
@@ -627,6 +655,7 @@ public class MiniGmail extends javax.swing.JFrame {
                 if (pf_ingreso_clave.getText().equals(pass)) {
 
                     JOptionPane.showMessageDialog(jd_ingreso, "Ingreso exitoso.", "Ingresado", JOptionPane.INFORMATION_MESSAGE);
+                    cuentaActual = (Cuenta) cb_ingreso_cuentas.getSelectedItem();
                     ingresar();
 
                 } else {
@@ -816,7 +845,7 @@ public class MiniGmail extends javax.swing.JFrame {
         try {
 
             StyleConstants.setBackground(estilo,
-                    JColorChooser.showDialog(this,
+                    JColorChooser.showDialog(jd_enviarCorreo,
                             "Seleccione Color", Color.yellow)
             );
 
@@ -833,7 +862,7 @@ public class MiniGmail extends javax.swing.JFrame {
         try {
 
             StyleConstants.setForeground(estilo,
-                    JColorChooser.showDialog(this,
+                    JColorChooser.showDialog(jd_enviarCorreo,
                             "Seleccione Color", Color.red)
             );
 
@@ -845,51 +874,8 @@ public class MiniGmail extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_bt_colorLetraMouseClicked
 
-    private void bt_guardarCorreoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarCorreoMouseClicked
-        JFileChooser jfc = new JFileChooser();
-        FileNameExtensionFilter filtro
-                = new FileNameExtensionFilter(
-                        "El Inge Docs", "omf");
-        jfc.setFileFilter(filtro);
-        int seleccion = jfc.showSaveDialog(this);
+    private void bt_abrirBorradorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_abrirBorradorMouseClicked
 
-        FileOutputStream fw = null;
-        ObjectOutputStream bw = null;
-        if (seleccion == JFileChooser.APPROVE_OPTION) {
-            try {
-
-                File fichero = null;
-                if (jfc.getFileFilter().getDescription().equals(
-                        "El Inge Docs")) {
-                    fichero
-                            = new File(jfc.getSelectedFile().getPath() + ".omf");
-                } else {
-                    fichero = jfc.getSelectedFile();
-                }
-
-                fw = new FileOutputStream(fichero);
-                bw = new ObjectOutputStream(fw);
-                Documento d = new Documento(tp_texto, doc, estilo);
-                bw.writeObject(d);
-                bw.flush();
-
-                JOptionPane.showMessageDialog(this,
-                        "Archivo guardado exitosamente");
-
-            } catch (Exception e) {
-            }
-
-        }//fin IF
-        try {
-            bw.close();
-            fw.close();
-        } catch (IOException ex) {
-        }
-
-    }//GEN-LAST:event_bt_guardarCorreoMouseClicked
-
-    private void bt_abrirCorreoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_abrirCorreoMouseClicked
-        // TODO add your handling code here:
         File fichero = null;
         FileInputStream entrada = null;
         ObjectInputStream objeto = null;
@@ -921,7 +907,7 @@ public class MiniGmail extends javax.swing.JFrame {
             entrada.close();
         } catch (IOException ex) {
         }
-    }//GEN-LAST:event_bt_abrirCorreoMouseClicked
+    }//GEN-LAST:event_bt_abrirBorradorMouseClicked
 
     private void bt_mensajeNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_mensajeNuevoActionPerformed
         
@@ -963,6 +949,105 @@ public class MiniGmail extends javax.swing.JFrame {
             list_destinatarios.setModel(model);
         }
     }//GEN-LAST:event_bt_eliminarDestinatarioActionPerformed
+
+    private void bt_enviarCorreoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_enviarCorreoActionPerformed
+        
+        DefaultListModel lmodel = (DefaultListModel) list_destinatarios.getModel();
+        
+        if (!lmodel.isEmpty()) {
+            try {
+
+                Documento d = new Documento(tp_texto, doc, estilo);
+                
+                Correo correo = new Correo(cuentaActual, (Cuenta) lmodel.get(0), tf_asunto.getText(), d, new Date(), false);
+                
+                DefaultMutableTreeNode nodo = new DefaultMutableTreeNode(correo);
+                
+                //cuentaActual.cargarCorreos();
+                cuentaActual.getEnviados().add(nodo);
+                cuentaActual.escribirCorreos();
+                
+                Cuenta cuenta;
+                for (Object c : lmodel.toArray()) {
+                    cuenta = (Cuenta) c;
+                    cuenta.cargarCorreos();
+                    cuenta.setRecibido(correo);
+                    cuenta.escribirCorreos();
+                }
+                
+                JOptionPane.showMessageDialog(jd_enviarCorreo,
+                        "Correo enviado exitosamente");
+
+                jd_enviarCorreo.setVisible(false);
+                tp_texto.setText("");
+                tf_asunto.setText("");
+                cb_destinatarios.setSelectedIndex(-1);
+                lmodel.removeAllElements();
+                
+                if (correoSeleccionado != null) {
+                    cuentaActual.getBorradores().remove(nodoSeleccionado);/////////////////////////////////////
+                    correoSeleccionado = null;
+                    nodoSeleccionado = null;
+                }
+                
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }//fin if
+        
+    }//GEN-LAST:event_bt_enviarCorreoActionPerformed
+
+    private void bt_guardarBorradorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_guardarBorradorActionPerformed
+        
+        DefaultListModel lmodel = (DefaultListModel) list_destinatarios.getModel();
+        
+        
+            try {
+
+                Documento d = new Documento(tp_texto, doc, estilo);
+                
+                Correo correo = new Correo();
+                correo.setEmisor(cuentaActual);
+                if (lmodel.isEmpty()) {
+                    correo.setReceptorPrincipal((Cuenta) lmodel.get(0));
+                }
+                correo.setAsunto(tf_asunto.getText());
+                correo.setCuerpo(d);
+                correo.setFechaEnvio(new Date());
+                correo.setLeido(false);
+                
+                DefaultMutableTreeNode nodo = new DefaultMutableTreeNode(correo);
+                
+                //cuentaActual.cargarCorreos();
+                
+                if (correoSeleccionado!=null) {
+                    nodoSeleccionado.setUserObject(correo);
+                    correoSeleccionado = null;
+                    nodoSeleccionado = null;
+                    JOptionPane.showMessageDialog(jd_enviarCorreo,
+                        "Cambios guardados");
+                } else {
+                    cuentaActual.getBorradores().add(nodo);
+                    JOptionPane.showMessageDialog(jd_enviarCorreo,
+                        "Borrador guardado exitosamente");
+                }
+                cuentaActual.escribirCorreos();
+                
+                
+
+                jd_enviarCorreo.setVisible(false);
+                tp_texto.setText("");
+                tf_asunto.setText("");
+                cb_destinatarios.setSelectedIndex(-1);
+                lmodel.removeAllElements();
+                
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        
+    }//GEN-LAST:event_bt_guardarBorradorActionPerformed
 
     private void cargarCuentas() {
 
@@ -1046,6 +1131,7 @@ public class MiniGmail extends javax.swing.JFrame {
         
         DefaultComboBoxModel cbm = (DefaultComboBoxModel)cb_ingreso_cuentas.getModel();
         cb_destinatarios.setModel(cbm);
+        cuentaActual.cargarCorreos();
     }
 
     /**
@@ -1085,13 +1171,14 @@ public class MiniGmail extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToolBar barra_herramientas;
-    private javax.swing.JButton bt_abrirCorreo;
+    private javax.swing.JButton bt_abrirBorrador;
     private javax.swing.JButton bt_agregarDestinatario;
     private javax.swing.JButton bt_colorLetra;
     private javax.swing.JButton bt_crearCuenta;
     private javax.swing.JButton bt_cursiva;
     private javax.swing.JButton bt_eliminarDestinatario;
-    private javax.swing.JButton bt_guardarCorreo;
+    private javax.swing.JButton bt_enviarCorreo;
+    private javax.swing.JButton bt_guardarBorrador;
     private javax.swing.JButton bt_login;
     private javax.swing.JButton bt_mensajeNuevo;
     private javax.swing.JButton bt_negrita;
@@ -1147,5 +1234,7 @@ public class MiniGmail extends javax.swing.JFrame {
     StyledDocument doc;
 
     Cuenta cuentaActual;
+    Correo correoSeleccionado;
+    DefaultMutableTreeNode nodoSeleccionado;
 
 }

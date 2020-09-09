@@ -1,10 +1,17 @@
 package minigmail;
 
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Date;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-public class Cuenta {
+public class Cuenta implements Serializable {
 
     static final int BANDEJA_RECIBIDOS = 0;
     static final int BANDEJA_ENVIADOS = 1;
@@ -23,6 +30,10 @@ public class Cuenta {
     private DefaultMutableTreeNode eliminados;
     private DefaultMutableTreeNode borradores;
     private DefaultMutableTreeNode spam;
+
+    private DefaultMutableTreeNode[] nodos;
+
+    public static final long SerialVersionUID = 1L;
 
     public Cuenta() {
         initTree();
@@ -93,6 +104,11 @@ public class Cuenta {
         this.recibidos = recibidos;
     }
 
+    public void setRecibido(Correo recibido) {
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(recibido);
+        recibidos.add(node);
+    }
+
     public DefaultMutableTreeNode getEnviados() {
         return enviados;
     }
@@ -129,15 +145,17 @@ public class Cuenta {
     public String toString() {
         return direccionCorreoElectronico;
     }
-    
-    private void initTree(){
+
+    private void initTree() {
         DefaultMutableTreeNode raiz = new DefaultMutableTreeNode();
-        recibidos = new DefaultMutableTreeNode();
-        enviados = new DefaultMutableTreeNode();
-        eliminados = new DefaultMutableTreeNode();
-        borradores = new DefaultMutableTreeNode();
-        spam = new DefaultMutableTreeNode();
-        
+        recibidos = new DefaultMutableTreeNode("Recibidos");
+        enviados = new DefaultMutableTreeNode("Enviados");
+        eliminados = new DefaultMutableTreeNode("Eliminados");
+        borradores = new DefaultMutableTreeNode("Borradores");
+        spam = new DefaultMutableTreeNode("Spam");
+
+        nodos = new DefaultMutableTreeNode[]{enviados, recibidos, eliminados, borradores, spam};
+
         modelo_bandejas = new DefaultTreeModel(raiz);
 
         raiz.add(recibidos);    //0
@@ -147,4 +165,72 @@ public class Cuenta {
         raiz.add(spam);         //4
     }
 
- }
+    public void cargarCorreos() {
+
+        File archivo = null;
+        FileInputStream fi = null;
+        ObjectInputStream oi = null;
+
+        try {
+
+            for (DefaultMutableTreeNode nodo : nodos) {
+
+                String p = "./Correos/" + direccionCorreoElectronico;
+                archivo = new File(p + "/" + nodo.getUserObject() + ".aaa");
+
+                if (archivo.exists()) {
+
+                    fi = new FileInputStream(archivo);
+                    oi = new ObjectInputStream(fi);
+                    Correo c;
+
+                    try {
+                        while ((c = (Correo) oi.readObject()) != null) {
+                            DefaultMutableTreeNode correo = new DefaultMutableTreeNode(c);
+                            nodo.add(correo);
+                        }//fin while
+                    } catch (EOFException e) {
+                    }
+
+                    oi.close();
+                    fi.close();
+
+                }//Fin if exists
+
+            }//fin for
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void escribirCorreos() {
+
+        File archivo = null;
+        FileOutputStream fo = null;
+        ObjectOutputStream oo = null;
+
+        try {
+
+            for (DefaultMutableTreeNode nodo : nodos) {
+                archivo = new File("./Correos/" + direccionCorreoElectronico + "/" + nodo.getUserObject() + ".aaa");
+
+                fo = new FileOutputStream(archivo);
+                oo = new ObjectOutputStream(fo);
+
+                for (int i = 0; i < nodo.getChildCount(); i++) {
+                    oo.writeObject((Correo) ((DefaultMutableTreeNode) nodo.getChildAt(i)).getUserObject());
+                }
+
+                oo.close();
+                fo.close();
+            }//fin for
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+}

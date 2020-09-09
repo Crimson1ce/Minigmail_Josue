@@ -1,21 +1,24 @@
 package minigmail;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Correo {
+public class Correo implements Serializable {
     private Cuenta emisor;
-    private Cuenta receptor;
+    private Cuenta receptorPrincipal;
     private String asunto;
-    private String cuerpo;
+    private Documento cuerpo;
     private Date fechaEnvio;
     private boolean leido;
 
+    public static final long SerialVersionUID = 1L;
+    
     public Correo() {
     }
 
-    public Correo(Cuenta emisor, Cuenta receptor, String asunto, String cuerpo, Date fechaEnvio, boolean leido) {
+    public Correo(Cuenta emisor, Cuenta receptorPrincipal, String asunto, Documento cuerpo, Date fechaEnvio, boolean leido) {
         this.emisor = emisor;
-        this.receptor = receptor;
+        this.receptorPrincipal = receptorPrincipal;
         this.asunto = asunto;
         this.cuerpo = cuerpo;
         this.fechaEnvio = fechaEnvio;
@@ -38,12 +41,12 @@ public class Correo {
         this.emisor = emisor;
     }
 
-    public Cuenta getReceptor() {
-        return receptor;
+    public Cuenta getReceptorPrincipal() {
+        return receptorPrincipal;
     }
 
-    public void setReceptor(Cuenta receptor) {
-        this.receptor = receptor;
+    public void setReceptorPrincipal(Cuenta receptorPrincipal) {
+        this.receptorPrincipal = receptorPrincipal;
     }
 
     public String getAsunto() {
@@ -54,11 +57,11 @@ public class Correo {
         this.asunto = asunto;
     }
 
-    public String getCuerpo() {
+    public Documento getCuerpo() {
         return cuerpo;
     }
 
-    public void setCuerpo(String cuerpo) {
+    public void setCuerpo(Documento cuerpo) {
         this.cuerpo = cuerpo;
     }
 
