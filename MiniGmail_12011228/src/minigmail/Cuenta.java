@@ -174,22 +174,29 @@ public class Cuenta implements Serializable {
         try {
 
             for (DefaultMutableTreeNode nodo : nodos) {
-
+                //int n = 0;
                 String p = "./Correos/" + direccionCorreoElectronico;
                 archivo = new File(p + "/" + nodo.getUserObject() + ".aaa");
-
+                //n++;
                 if (archivo.exists()) {
 
                     fi = new FileInputStream(archivo);
                     oi = new ObjectInputStream(fi);
-                    Correo c;
-
+                    Correo c = null;
+                    
                     try {
-                        while ((c = (Correo) oi.readObject()) != null) {
+                        c = (Correo) oi.readObject();
+                        while (!c.equals(null)) {
+                            //System.out.println(n);
                             DefaultMutableTreeNode correo = new DefaultMutableTreeNode(c);
                             nodo.add(correo);
+                            c = (Correo) oi.readObject();
                         }//fin while
                     } catch (EOFException e) {
+                    } catch (NullPointerException e){
+                        System.out.println("No hay correos.");
+                    } catch (Exception e){
+                        e.printStackTrace();
                     }
 
                     oi.close();
