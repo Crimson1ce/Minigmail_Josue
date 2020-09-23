@@ -41,15 +41,15 @@ public class Clase20200623 {
         
        
         //modificar
-       /* Dba db = new Dba("./base1.mdb");
-        db.conectar();
+        Dba dab = new Dba("./base1.mdb");
+        dab.conectar();
         try {
-            db.query.execute("update alumnos set nombre='Donald Trump' where cuenta=5000");
-            db.commit();
+            dab.query.execute("update alumnos set nombre='Donald Trump' where cuenta=5000");
+            dab.commit();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        db.desconectar();*/
+        dab.desconectar();
        
        
        //eliminar

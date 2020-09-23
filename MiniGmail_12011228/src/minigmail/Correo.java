@@ -11,7 +11,7 @@ public class Correo implements Serializable {
     private Date fechaEnvio;
     private boolean leido;
 
-    public static final long SerialVersionUID = 1L;
+    public static final long serialVersionUID = 2L;
     
     public Correo() {
     }

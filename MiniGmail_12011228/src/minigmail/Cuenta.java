@@ -3,37 +3,45 @@ package minigmail;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 public class Cuenta implements Serializable {
-
-    static final int BANDEJA_RECIBIDOS = 0;
-    static final int BANDEJA_ENVIADOS = 1;
-    static final int BANDEJA_ELIMINADOS = 2;
-    static final int BANDEJA_BORRADORES = 3;
-    static final int BANDEJA_SPAM = 4;
+//
+//    static final int BANDEJA_ENVIADOS = 0;
+//    static final int BANDEJA_RECIBIDOS = 1;
+//    static final int BANDEJA_ELIMINADOS = 2;
+//    static final int BANDEJA_BORRADORES = 3;
+//    static final int BANDEJA_SPAM = 4;
 
     private String direccionCorreoElectronico;
     private String nombre;
     private String apellido;
     private String clave;
     private Date fechaDeCreacion;
-    private DefaultTreeModel modelo_bandejas;
-    private DefaultMutableTreeNode recibidos;
-    private DefaultMutableTreeNode enviados;
-    private DefaultMutableTreeNode eliminados;
-    private DefaultMutableTreeNode borradores;
-    private DefaultMutableTreeNode spam;
+    private ArrayList<Correo> recibidos;
+    private ArrayList<Correo> enviados;
+    private ArrayList<Correo> eliminados;
+    private ArrayList<Correo> borradores;
+    private ArrayList<Correo> spam;
 
-    private DefaultMutableTreeNode[] nodos;
+    private ArrayList<Correo>[] bandejas;
+    private String[] carpetas;
 
-    public static final long SerialVersionUID = 1L;
+    private ArrayList<Cuenta> cuentasSpam;
+    private ArrayList<Date[]> fechasSpam;
+    private ArrayList<String> asuntoSpam;
+
+    private ArrayList<Chat> chats;
+
+    public static final long serialVersionUID = 3L;
 
     public Cuenta() {
         initTree();
@@ -88,57 +96,60 @@ public class Cuenta implements Serializable {
         this.fechaDeCreacion = fechaDeCreacion;
     }
 
-    public DefaultTreeModel getModelo_bandejas() {
-        return modelo_bandejas;
-    }
-
-    public void setModelo_bandejas(DefaultTreeModel modelo_bandejas) {
-        this.modelo_bandejas = modelo_bandejas;
-    }
-
-    public DefaultMutableTreeNode getRecibidos() {
+    protected ArrayList<Correo> getRecibidos() {
         return recibidos;
     }
 
-    public void setRecibidos(DefaultMutableTreeNode recibidos) {
+    public void setRecibidos(ArrayList<Correo> recibidos) {
         this.recibidos = recibidos;
     }
 
     public void setRecibido(Correo recibido) {
-        DefaultMutableTreeNode node = new DefaultMutableTreeNode(recibido);
-        recibidos.add(node);
+        recibidos.add(recibido);
     }
 
-    public DefaultMutableTreeNode getEnviados() {
+    public ArrayList<Correo> getEnviados() {
         return enviados;
     }
 
-    public void setEnviados(DefaultMutableTreeNode enviados) {
+    public void setEnviados(ArrayList<Correo> enviados) {
         this.enviados = enviados;
     }
 
-    public DefaultMutableTreeNode getEliminados() {
+    public ArrayList<Correo> getEliminados() {
         return eliminados;
     }
 
-    public void setEliminados(DefaultMutableTreeNode eliminados) {
+    public void setEliminados(ArrayList<Correo> eliminados) {
         this.eliminados = eliminados;
     }
 
-    public DefaultMutableTreeNode getBorradores() {
+    public ArrayList<Correo> getBorradores() {
         return borradores;
     }
 
-    public void setBorradores(DefaultMutableTreeNode borradores) {
+    public void setBorradores(ArrayList<Correo> borradores) {
         this.borradores = borradores;
     }
 
-    public DefaultMutableTreeNode getSpam() {
+    public ArrayList<Correo> getSpam() {
         return spam;
     }
 
-    public void setSpam(DefaultMutableTreeNode spam) {
+    public void setSpam(ArrayList<Correo> spam) {
         this.spam = spam;
+    }
+
+    public ArrayList<Correo>[] getBandejas() {
+        return bandejas;
+    }
+
+    public ArrayList<Chat> getChats() {
+        return chats;
+    }
+
+    public void setChats(ArrayList<Chat> chats) {
+        this.chats = chats;
     }
 
     @Override
@@ -148,21 +159,20 @@ public class Cuenta implements Serializable {
 
     private void initTree() {
         DefaultMutableTreeNode raiz = new DefaultMutableTreeNode();
-        recibidos = new DefaultMutableTreeNode("Recibidos");
-        enviados = new DefaultMutableTreeNode("Enviados");
-        eliminados = new DefaultMutableTreeNode("Eliminados");
-        borradores = new DefaultMutableTreeNode("Borradores");
-        spam = new DefaultMutableTreeNode("Spam");
+        recibidos = new ArrayList();
+        enviados = new ArrayList();
+        eliminados = new ArrayList();
+        borradores = new ArrayList();
+        spam = new ArrayList();
 
-        nodos = new DefaultMutableTreeNode[]{enviados, recibidos, eliminados, borradores, spam};
+        bandejas = new ArrayList[]{enviados, recibidos, eliminados, borradores, spam};
+        carpetas = new String[]{"Enviados", "Recibidos", "Eliminados", "Borradores", "Spam"};
 
-        modelo_bandejas = new DefaultTreeModel(raiz);
-
-        raiz.add(recibidos);    //0
-        raiz.add(enviados);     //1
-        raiz.add(eliminados);   //2
-        raiz.add(borradores);   //3
-        raiz.add(spam);         //4
+        cuentasSpam = new ArrayList<>();
+        fechasSpam = new ArrayList<>();
+        asuntoSpam = new ArrayList<>();
+        
+        chats = new ArrayList<>();
     }
 
     public void cargarCorreos() {
@@ -173,29 +183,24 @@ public class Cuenta implements Serializable {
 
         try {
 
-            for (DefaultMutableTreeNode nodo : nodos) {
-                //int n = 0;
-                String p = "./Correos/" + direccionCorreoElectronico;
-                archivo = new File(p + "/" + nodo.getUserObject() + ".aaa");
-                //n++;
+            for (int i = 0; i < 5; i++) {
+
+                archivo = new File("./Cuentas/" + direccionCorreoElectronico + "/" + carpetas[i] + ".aaa");
+
                 if (archivo.exists()) {
 
                     fi = new FileInputStream(archivo);
                     oi = new ObjectInputStream(fi);
-                    Correo c = null;
-                    
+                    Correo c;
+
                     try {
-                        c = (Correo) oi.readObject();
-                        while (!c.equals(null)) {
-                            //System.out.println(n);
-                            DefaultMutableTreeNode correo = new DefaultMutableTreeNode(c);
-                            nodo.add(correo);
-                            c = (Correo) oi.readObject();
+                        while ((c = (Correo) oi.readObject()) != null) {
+                            bandejas[i].add(c);
                         }//fin while
                     } catch (EOFException e) {
-                    } catch (NullPointerException e){
-                        System.out.println("No hay correos.");
-                    } catch (Exception e){
+                    } catch (NullPointerException e) {
+//                        e.printStackTrace();
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -220,18 +225,24 @@ public class Cuenta implements Serializable {
 
         try {
 
-            for (DefaultMutableTreeNode nodo : nodos) {
-                archivo = new File("./Correos/" + direccionCorreoElectronico + "/" + nodo.getUserObject() + ".aaa");
+            for (int i = 0; i < 5; i++) {
 
-                fo = new FileOutputStream(archivo);
-                oo = new ObjectOutputStream(fo);
+                archivo = new File("./Cuentas/" + direccionCorreoElectronico + "/" + carpetas[i] + ".aaa");
 
-                for (int i = 0; i < nodo.getChildCount(); i++) {
-                    oo.writeObject((Correo) ((DefaultMutableTreeNode) nodo.getChildAt(i)).getUserObject());
+                try {
+                    fo = new FileOutputStream(archivo);
+
+                    oo = new ObjectOutputStream(fo);
+
+                    for (Correo correo : bandejas[i]) {
+                        oo.writeObject(correo);
+                        oo.flush();
+                    }
+
+                    oo.close();
+                    fo.close();
+                } catch (FileNotFoundException e) {
                 }
-
-                oo.close();
-                fo.close();
             }//fin for
 
         } catch (Exception e) {
@@ -240,4 +251,66 @@ public class Cuenta implements Serializable {
 
     }
 
+    public ArrayList<Cuenta> getCuentasSpam() {
+        return cuentasSpam;
+    }
+
+    public void setCuentasSpam(ArrayList<Cuenta> cuentasSpam) {
+        this.cuentasSpam = cuentasSpam;
+    }
+
+    public ArrayList<Date[]> getFechasSpam() {
+        return fechasSpam;
+    }
+
+    public void setFechasSpam(ArrayList<Date[]> fechasSpam) {
+        this.fechasSpam = fechasSpam;
+    }
+
+    public ArrayList<String> getAsuntoSpam() {
+        return asuntoSpam;
+    }
+
+    public void setAsuntoSpam(ArrayList<String> asuntoSpam) {
+        this.asuntoSpam = asuntoSpam;
+    }
+
+    public void cargarChat() {
+        try {
+            File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Chats.jdf");
+            if (f.exists()) {
+                FileInputStream fi = new FileInputStream(f);
+                ObjectInputStream oi = new ObjectInputStream(fi);
+                Chat chat;
+                
+                chats = new ArrayList<>();
+                try {
+                    while ((chat = (Chat) oi.readObject()) != null) {
+                        chats.add(chat);
+                    }
+                } catch (EOFException e) {
+                }
+                oi.close();
+                fi.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void escribirChats(){
+        try {
+            File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Chats.jdf");
+            FileOutputStream fo = new FileOutputStream(f, false);
+            ObjectOutputStream oo = new ObjectOutputStream(fo);
+            
+            for (Chat chat : chats) {
+                oo.writeObject(chat);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 }

@@ -9,14 +9,15 @@ public class Documento implements Serializable{
     private JTextPane panel;
     private StyledDocument doc;
     private Style estilo;
-
-    public static final long SerialVersionUID = 1L;
-
+    private String texto;
     
-    public Documento(JTextPane panel, StyledDocument doc, Style estilo) {
+    public static final long serialVersionUID = 1L;
+
+    public Documento(JTextPane panel, StyledDocument doc, Style estilo, String texto) {
         this.panel = panel;
         this.doc = doc;
         this.estilo = estilo;
+        this.texto = texto;
     }
 
     public JTextPane getPanel() {
@@ -43,11 +44,17 @@ public class Documento implements Serializable{
         this.estilo = estilo;
     }
 
+    public String getTexto() {
+        return texto;
+    }
+
+    public void setTexto(String texto) {
+        this.texto = texto;
+    }
+
     @Override
     public String toString() {
-        return panel.getText();
+        return texto;
     }
-    
-    
-    
+
 }
