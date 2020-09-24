@@ -75,6 +75,6 @@ public class Correo implements Serializable {
 
     @Override
     public String toString() {
-        return asunto;
+        return asunto + " - " + ( leido ? "Leído" : "No leído" ) + " - " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(fechaEnvio);
     }
 }

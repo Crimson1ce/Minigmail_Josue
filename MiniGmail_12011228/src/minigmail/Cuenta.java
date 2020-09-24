@@ -1,25 +1,24 @@
 package minigmail;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 
 public class Cuenta implements Serializable {
-//
-//    static final int BANDEJA_ENVIADOS = 0;
-//    static final int BANDEJA_RECIBIDOS = 1;
-//    static final int BANDEJA_ELIMINADOS = 2;
-//    static final int BANDEJA_BORRADORES = 3;
-//    static final int BANDEJA_SPAM = 4;
 
     private String direccionCorreoElectronico;
     private String nombre;
@@ -35,11 +34,10 @@ public class Cuenta implements Serializable {
     private ArrayList<Correo>[] bandejas;
     private String[] carpetas;
 
-    private ArrayList<Cuenta> cuentasSpam;
-    private ArrayList<Date[]> fechasSpam;
-    private ArrayList<String> asuntoSpam;
-
     private ArrayList<Chat> chats;
+    private ArrayList<GrupoContactos> grupos;
+    private ArrayList<Tarea> tareas;
+    private ArrayList<Filtro> filtros;
 
     public static final long serialVersionUID = 3L;
 
@@ -60,7 +58,7 @@ public class Cuenta implements Serializable {
         return direccionCorreoElectronico;
     }
 
-    public void setdireccionCorreoElectronico(String direccionCorreoElectronico) {
+    public void setDireccionCorreoElectronico(String direccionCorreoElectronico) {
         this.direccionCorreoElectronico = direccionCorreoElectronico;
     }
 
@@ -105,7 +103,42 @@ public class Cuenta implements Serializable {
     }
 
     public void setRecibido(Correo recibido) {
-        recibidos.add(recibido);
+        boolean flag = true;
+        for (Filtro filtro : filtros) {
+            if (filtro instanceof FiltroAsunto) {
+                if (recibido.getAsunto().contains(((FiltroAsunto) filtro).getPalabras().toUpperCase())) {
+                    flag = false;
+                    break;
+                }
+            } else if (filtro instanceof FiltroCuenta) {
+                if (recibido.getEmisor().getDireccionCorreoElectronico().equals(((FiltroCuenta) filtro).getDireccionCorreo())) {
+                    flag = false;
+                    break;
+                }
+            } else if (filtro instanceof FiltroHora) {
+                int m = recibido.getFechaEnvio().getMinutes();
+                int h = recibido.getFechaEnvio().getHours();
+                FiltroHora f = (FiltroHora) filtro;
+                if ((h > f.getHoraInicio() && h < f.getHoraFinal())
+                        ||
+                        (h == f.getHoraInicio() && m >= f.getMinutoInicio())
+                        ||
+                        (h == f.getHoraFinal() && m <= f.getMinutoFinal())
+                    ) {
+                    if (h <= f.getHoraFinal()) {
+                        if (m <= f.getMinutoFinal()) {//Entra al filtro
+                            flag = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (flag) {
+            recibidos.add(recibido);
+        } else {
+            spam.add(recibido);
+        }
     }
 
     public ArrayList<Correo> getEnviados() {
@@ -152,13 +185,28 @@ public class Cuenta implements Serializable {
         this.chats = chats;
     }
 
+    public ArrayList<GrupoContactos> getGrupos() {
+        return grupos;
+    }
+
+    public void setGrupos(ArrayList<GrupoContactos> grupos) {
+        this.grupos = grupos;
+    }
+
+    public ArrayList<Filtro> getFiltros() {
+        return filtros;
+    }
+
+    public void setFiltros(ArrayList<Filtro> filtros) {
+        this.filtros = filtros;
+    }
+
     @Override
     public String toString() {
         return direccionCorreoElectronico;
     }
 
     private void initTree() {
-        DefaultMutableTreeNode raiz = new DefaultMutableTreeNode();
         recibidos = new ArrayList();
         enviados = new ArrayList();
         eliminados = new ArrayList();
@@ -168,11 +216,10 @@ public class Cuenta implements Serializable {
         bandejas = new ArrayList[]{enviados, recibidos, eliminados, borradores, spam};
         carpetas = new String[]{"Enviados", "Recibidos", "Eliminados", "Borradores", "Spam"};
 
-        cuentasSpam = new ArrayList<>();
-        fechasSpam = new ArrayList<>();
-        asuntoSpam = new ArrayList<>();
-        
         chats = new ArrayList<>();
+        grupos = new ArrayList<>();
+        tareas = new ArrayList<>();
+        filtros = new ArrayList<>();
     }
 
     public void cargarCorreos() {
@@ -199,7 +246,7 @@ public class Cuenta implements Serializable {
                         }//fin while
                     } catch (EOFException e) {
                     } catch (NullPointerException e) {
-//                        e.printStackTrace();
+                        //e.printStackTrace();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -251,38 +298,78 @@ public class Cuenta implements Serializable {
 
     }
 
-    public ArrayList<Cuenta> getCuentasSpam() {
-        return cuentasSpam;
+    public void cargarRecibidos() {
+        File archivo = null;
+        FileInputStream fi = null;
+        ObjectInputStream oi = null;
+
+        try {
+
+            archivo = new File("./Cuentas/" + direccionCorreoElectronico + "/Recibidos.aaa");
+
+            if (archivo.exists()) {
+
+                fi = new FileInputStream(archivo);
+                oi = new ObjectInputStream(fi);
+                Correo c;
+
+                recibidos = new ArrayList<>();
+                try {
+                    while ((c = (Correo) oi.readObject()) != null) {
+                        recibidos.add(c);
+                    }//fin while
+                } catch (EOFException e) {
+                } catch (NullPointerException e) {
+                    //e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                oi.close();
+                fi.close();
+
+            }//Fin if exists
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void setCuentasSpam(ArrayList<Cuenta> cuentasSpam) {
-        this.cuentasSpam = cuentasSpam;
+    public void escribirRecibidos() {
+        File archivo = null;
+        FileOutputStream fo = null;
+        ObjectOutputStream oo = null;
+
+        try {
+
+            archivo = new File("./Cuentas/" + direccionCorreoElectronico + "/Recibidos.aaa");
+
+            fo = new FileOutputStream(archivo, false);
+            oo = new ObjectOutputStream(fo);
+            try {
+                for (Correo recibido : recibidos) {
+                    oo.writeObject(recibido);
+                    oo.flush();
+                }
+
+            } catch (EOFException e) {
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
     }
 
-    public ArrayList<Date[]> getFechasSpam() {
-        return fechasSpam;
-    }
-
-    public void setFechasSpam(ArrayList<Date[]> fechasSpam) {
-        this.fechasSpam = fechasSpam;
-    }
-
-    public ArrayList<String> getAsuntoSpam() {
-        return asuntoSpam;
-    }
-
-    public void setAsuntoSpam(ArrayList<String> asuntoSpam) {
-        this.asuntoSpam = asuntoSpam;
-    }
-
-    public void cargarChat() {
+    public void cargarChats() {
         try {
             File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Chats.jdf");
             if (f.exists()) {
+
                 FileInputStream fi = new FileInputStream(f);
                 ObjectInputStream oi = new ObjectInputStream(fi);
                 Chat chat;
-                
+
                 chats = new ArrayList<>();
                 try {
                     while ((chat = (Chat) oi.readObject()) != null) {
@@ -297,17 +384,204 @@ public class Cuenta implements Serializable {
             e.printStackTrace();
         }
     }
-    
-    public void escribirChats(){
+
+    public void escribirChats() {
         try {
             File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Chats.jdf");
             FileOutputStream fo = new FileOutputStream(f, false);
             ObjectOutputStream oo = new ObjectOutputStream(fo);
-            
+
             for (Chat chat : chats) {
                 oo.writeObject(chat);
+                oo.flush();
             }
-            
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cargarGrupos() {
+
+        grupos = new ArrayList<>();
+
+        //listar        
+        Dba db = new Dba("./Base2.accdb");
+        db.conectar();
+        try {
+            db.query.execute("select DireccionCorreo,NombreGrupo from Grupos");
+            ResultSet rs = db.query.getResultSet();
+            while (rs.next()) {
+                try {
+                    if (rs.getString(1).equals(direccionCorreoElectronico)) {
+                        grupos.add(new GrupoContactos(rs.getString(2)));
+                    }
+                } catch (Exception e) {
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        db.desconectar();
+
+        for (GrupoContactos grupo : grupos) {
+
+            try {
+                File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Grupos/" + grupo.getNombreGrupo() + ".txt");
+                if (f.exists()) {
+                    FileReader fr = new FileReader(f);
+                    BufferedReader br = new BufferedReader(fr);
+                    String direccion;
+                    try {
+                        while ((direccion = br.readLine()) != null) {
+                            grupo.getContactos().add(direccion);
+                        }
+                    } catch (EOFException e) {
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    public void agregarGrupo(String nombre) {
+
+        Dba db = new Dba("./Base2.accdb");
+        db.conectar();
+        try {
+            String n;
+
+            db.query.execute("INSERT INTO Grupos"
+                    + " (DireccionCorreo,NombreGrupo)"
+                    + " VALUES ('" + direccionCorreoElectronico + "', '" + nombre + "')");
+            db.commit();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        db.desconectar();
+
+        grupos.add(new GrupoContactos(nombre));
+
+        File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Grupos/" + grupos.get(grupos.size() - 1).getNombreGrupo() + ".txt");
+        try {
+            FileWriter fw = new FileWriter(f, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            bw.write(direccionCorreoElectronico);
+            bw.newLine();
+
+            bw.flush();
+            bw.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void escribirGrupos() {
+        for (GrupoContactos grupo : grupos) {
+            File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Grupos/" + grupo.getNombreGrupo() + ".txt");
+            try {
+                FileWriter fw = new FileWriter(f);
+                BufferedWriter bw = new BufferedWriter(fw);
+
+                for (String contacto : grupo.getContactos()) {
+                    bw.write(contacto);
+                    bw.newLine();
+                }
+
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public ArrayList<Tarea> getTareas() {
+        return tareas;
+    }
+
+    public void setTareas(ArrayList<Tarea> tareas) {
+        this.tareas = tareas;
+    }
+
+    public void cargarTareas() {
+        try {
+            File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Tareas.jos");
+            if (f.exists()) {
+
+                FileInputStream fi = new FileInputStream(f);
+                ObjectInputStream oi = new ObjectInputStream(fi);
+                Tarea tarea;
+
+                tareas = new ArrayList<>();
+                try {
+                    while ((tarea = (Tarea) oi.readObject()) != null) {
+                        tareas.add(tarea);
+                    }
+                } catch (EOFException e) {
+                }
+                oi.close();
+                fi.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void escribirTareas() {
+        try {
+            File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Tareas.jos");
+            FileOutputStream fo = new FileOutputStream(f, false);
+            ObjectOutputStream oo = new ObjectOutputStream(fo);
+
+            for (Tarea tarea : tareas) {
+                oo.writeObject(tarea);
+                oo.flush();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cargarFiltros() {
+        try {
+            File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Filtros.kms");
+            if (f.exists()) {
+
+                FileInputStream fi = new FileInputStream(f);
+                ObjectInputStream oi = new ObjectInputStream(fi);
+                Filtro filtro;
+
+                filtros = new ArrayList<>();
+                try {
+                    while ((filtro = (Filtro) oi.readObject()) != null) {
+                        filtros.add(filtro);
+                    }
+                } catch (EOFException e) {
+                }
+                oi.close();
+                fi.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void escribirFiltros() {
+        try {
+            File f = new File("./Cuentas/" + direccionCorreoElectronico + "/Filtros.kms");
+            FileOutputStream fo = new FileOutputStream(f, false);
+            ObjectOutputStream oo = new ObjectOutputStream(fo);
+
+            for (Filtro filtro : filtros) {
+                oo.writeObject(filtro);
+                oo.flush();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
