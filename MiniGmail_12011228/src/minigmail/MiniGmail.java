@@ -308,9 +308,7 @@ public class MiniGmail extends javax.swing.JFrame {
         jmi_signIn = new javax.swing.JMenuItem();
         jmi_logOut = new javax.swing.JMenuItem();
         jmi_cuenta = new javax.swing.JMenuItem();
-        jm_admin = new javax.swing.JMenu();
         jmi_dirCuentas = new javax.swing.JMenuItem();
-        jmi_bandejas = new javax.swing.JMenuItem();
         jm_ayuda = new javax.swing.JMenu();
 
         jd_ingreso.setTitle("Ingreso");
@@ -1605,14 +1603,15 @@ public class MiniGmail extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator10, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(sp_horas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel34)
-                    .addComponent(sp_minutos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel35)
-                    .addComponent(jLabel36)
+                .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label_propietario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel33))
+                    .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(sp_horas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel34)
+                        .addComponent(sp_minutos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel35)
+                        .addComponent(jLabel36)
+                        .addComponent(jLabel33)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane10, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1625,10 +1624,11 @@ public class MiniGmail extends javax.swing.JFrame {
                             .addComponent(chb_martes)
                             .addComponent(chb_miercoles))
                         .addGap(18, 18, 18)
-                        .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chb_viernes)
+                        .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chb_sabado)
-                            .addComponent(chb_jueves))
+                            .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(chb_viernes)
+                                .addComponent(chb_jueves)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jd_programarTareaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel37)
@@ -2159,9 +2159,6 @@ public class MiniGmail extends javax.swing.JFrame {
         });
         jm_opciones.add(jmi_cuenta);
 
-        jm_admin.setText("Administración");
-        jm_admin.setEnabled(false);
-
         jmi_dirCuentas.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
         jmi_dirCuentas.setText("Directorio de cuentas");
         jmi_dirCuentas.addActionListener(new java.awt.event.ActionListener() {
@@ -2169,13 +2166,7 @@ public class MiniGmail extends javax.swing.JFrame {
                 jmi_dirCuentasActionPerformed(evt);
             }
         });
-        jm_admin.add(jmi_dirCuentas);
-
-        jmi_bandejas.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_MASK));
-        jmi_bandejas.setText("Bandejas de correo");
-        jm_admin.add(jmi_bandejas);
-
-        jm_opciones.add(jm_admin);
+        jm_opciones.add(jmi_dirCuentas);
 
         menu_bar.add(jm_opciones);
 
@@ -2611,6 +2602,11 @@ public class MiniGmail extends javax.swing.JFrame {
         jmi_signIn.setEnabled(true);
         cuentaActual.escribirCorreos();
 
+        pf_ingreso_clave.setText("");
+        jmi_cuenta.setEnabled(false);
+        jmi_dirCuentas.setEnabled(false);
+        
+        
         limpiarArea();
 
         this.cuentaActual = null;
@@ -3081,7 +3077,7 @@ public class MiniGmail extends javax.swing.JFrame {
     }//GEN-LAST:event_jd_chatComponentHidden
 
     private void cb_usuariosItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cb_usuariosItemStateChanged
-        if (evt.getStateChange() == 2) {
+        /*if (evt.getStateChange() == 2) {
             if (cb_usuarios.getSelectedIndex() >= 0) {
                 DefaultComboBoxModel model = (DefaultComboBoxModel) cb_usuarios.getModel();
                 String nombre = (String) model.getElementAt(cb_usuarios.getSelectedIndex());
@@ -3112,6 +3108,7 @@ public class MiniGmail extends javax.swing.JFrame {
                 }
             }
         }
+        */
     }//GEN-LAST:event_cb_usuariosItemStateChanged
 
     private void ta_mensajesPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_ta_mensajesPropertyChange
@@ -3645,10 +3642,8 @@ public class MiniGmail extends javax.swing.JFrame {
     private com.toedter.calendar.JDateChooser jdc_final;
     private com.toedter.calendar.JDateChooser jdc_finalRep;
     private com.toedter.calendar.JDateChooser jdc_inicio;
-    private javax.swing.JMenu jm_admin;
     private javax.swing.JMenu jm_ayuda;
     private javax.swing.JMenu jm_opciones;
-    private javax.swing.JMenuItem jmi_bandejas;
     private javax.swing.JMenuItem jmi_cuenta;
     private javax.swing.JMenuItem jmi_dirCuentas;
     private javax.swing.JMenuItem jmi_eliminarDef;
@@ -3824,7 +3819,7 @@ public class MiniGmail extends javax.swing.JFrame {
         pf_ingreso_clave.setText("");
         jmi_logOut.setEnabled(true);
         jmi_cuenta.setEnabled(true);
-        jm_admin.setEnabled(true);
+        jmi_dirCuentas.setEnabled(true);
         jmi_signIn.setEnabled(false);
         DefaultComboBoxModel cbm = (DefaultComboBoxModel) cb_ingreso_cuentas.getModel();
         cb_destinatarios.setModel(cbm);
